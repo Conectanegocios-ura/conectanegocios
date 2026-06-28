@@ -204,6 +204,9 @@
           <button class="filter-btn" data-status="fechado">Fechado</button>
           <button class="filter-btn" data-status="descartado">Descartado</button>
         </div>
+        <div class="filter-row" id="city-row">
+          <button class="filter-btn active" data-city="todas">Todas cidades</button>
+        </div>
       </div>
       <div id="lead-list"></div>
     </div>
@@ -253,6 +256,7 @@ let leads        = [];
 let crmData      = {};
 let selectedId   = null;
 let filterStatus = 'todos';
+let filterCity   = 'todas';
 let searchQuery  = '';
 
 const STATUSES      = ['novo','contato','qualificado','negociando','fechado','descartado'];
@@ -303,6 +307,7 @@ function iniciarSync() {
   onValue(ref(db, 'leads'), snap => {
     leads = snap.val() ? Object.values(snap.val()) : [];
     setSyncStatus('ok');
+    renderCityFilter();
     renderList();
     if (selectedId) renderDetail();
     updateStats();
@@ -393,10 +398,28 @@ window.showToast = (msg, tipo) => {
 };
 
 // ── List ──
+function getCidades() {
+  const cidades = [...new Set(leads.map(l => (l.busca_regiao||'').split(',')[0].trim()).filter(Boolean))].sort();
+  return cidades;
+}
+
+function renderCityFilter() {
+  const row = document.getElementById('city-row');
+  const cidades = getCidades();
+  row.innerHTML = `<button class="filter-btn ${filterCity==='todas'?'active':''}" data-city="todas">Todas cidades</button>` +
+    cidades.map(c => `<button class="filter-btn ${filterCity===c?'active':''}" data-city="${c}">${c}</button>`).join('');
+  row.querySelectorAll('.filter-btn').forEach(btn => btn.addEventListener('click', () => {
+    filterCity = btn.dataset.city;
+    renderCityFilter();
+    renderList();
+  }));
+}
+
 function filteredLeads() {
   return leads.filter(l => {
     const d = getCRM(l._id);
     if (filterStatus !== 'todos' && d.status !== filterStatus) return false;
+    if (filterCity !== 'todas' && !(l.busca_regiao||'').startsWith(filterCity)) return false;
     if (searchQuery) { const q=searchQuery.toLowerCase(); return (l.nome||'').toLowerCase().includes(q)||(l.busca_regiao||'').toLowerCase().includes(q)||(l.telefone||'').includes(q); }
     return true;
   });

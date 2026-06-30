@@ -345,6 +345,8 @@ let filterOrigem   = 'todos';
 let filterTempo    = 'todos';
 let searchQuery    = '';
 let leadModificado = false;
+let listPage = 1;
+const PAGE_SIZE = 80;
 
 // ── Status funnels por origem ──
 const STATUSES_BY_ORIGEM = {
@@ -629,11 +631,19 @@ function filteredLeads(){
     return true;
   });
 }
-function renderList(){
+let _renderTimer=null;
+function renderList(resetPage=true){
+  if(_renderTimer)clearTimeout(_renderTimer);
+  _renderTimer=setTimeout(()=>_doRenderList(resetPage),60);
+}
+function _doRenderList(resetPage=true){
+  if(resetPage)listPage=1;
   const list=document.getElementById('lead-list'), fl=filteredLeads();
   if(!fl.length){list.innerHTML='<div class="no-leads">Nenhum lead encontrado</div>';return;}
+  const visible=fl.slice(0,listPage*PAGE_SIZE);
+  const hasMore=visible.length<fl.length;
   const today=new Date().toISOString().slice(0,10);
-  list.innerHTML=fl.map(l=>{
+  list.innerHTML=visible.map(l=>{
     const data=getCRM(l._id), origem=origemLead(l), sel=l._id===selectedId?' selected':'';
     let dateLabel='';
     if(data.nextContact){const cls=data.nextContact<today?'overdue':data.nextContact===today?'today':'';const pre=data.nextContact<today?'⚠ ':'○ ';dateLabel=`<span class="lc-date ${cls}">${pre}${formatDate(data.nextContact)}</span>`;}
@@ -660,9 +670,10 @@ function renderList(){
       </div>
       ${urgencyBadge}${cobBadge}
     </div>`;
-  }).join('');
+  }).join('')+(hasMore?`<div id="load-more" style="padding:14px;text-align:center;color:var(--muted);font-size:12px;cursor:pointer" onclick="loadMoreLeads()">Mostrando ${visible.length} de ${fl.length} — carregar mais</div>`:`<div style="padding:10px;text-align:center;color:var(--muted);font-size:11px">${fl.length} leads</div>`);
   list.querySelectorAll('.lead-card').forEach(el=>el.addEventListener('click',()=>selectLead(el.dataset.id)));
 }
+window.loadMoreLeads=()=>{listPage++;renderList(false);};
 function updateStats(){
   document.getElementById('cnt-total').textContent=leads.length;
   document.getElementById('cnt-contato').textContent=leads.filter(l=>['contato','contato_feito'].includes(getCRM(l._id).status)).length;

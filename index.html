@@ -276,15 +276,7 @@
           <button class="filter-btn origem-refid" data-origem="refidelizacao">Refidelização</button>
           <button class="filter-btn origem-winback" data-origem="winback">Winback</button>
         </div>
-        <div class="filter-row" id="filter-row">
-          <button class="filter-btn active" data-status="todos">Todos</button>
-          <button class="filter-btn" data-status="novo">Novo</button>
-          <button class="filter-btn" data-status="contato">Contato</button>
-          <button class="filter-btn" data-status="qualificado">Qualificado</button>
-          <button class="filter-btn" data-status="negociando">Negociando</button>
-          <button class="filter-btn" data-status="fechado">Fechado</button>
-          <button class="filter-btn" data-status="descartado">Descartado</button>
-        </div>
+        <div class="filter-row" id="filter-row"></div>
         <div class="filter-row" id="tempo-row" style="display:none">
           <button class="filter-btn active" data-tempo="todos">Todos</button>
           <button class="filter-btn tempo-janela" data-tempo="janela">🔥 Janela 9–11m</button>
@@ -441,6 +433,7 @@ function iniciarSync() {
   onValue(ref(db, 'leads'), snap => {
     leads = snap.val() ? Object.values(snap.val()) : [];
     setSyncStatus('ok');
+    renderStatusFilter();
     renderCityFilter();
     renderList();
     if (selectedId) renderDetail();
@@ -510,7 +503,7 @@ document.getElementById('mailing-input').addEventListener('change', async e => {
       const XLSX=window.XLSX;
       const wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array'});
       const ws=wb.Sheets[wb.SheetNames[0]];
-      const rows=XLSX.utils.sheet_to_json(ws,{defval:''});
+      const rows=XLSX.utils.sheet_to_json(ws,{defval:'',cellDates:true});
 
       // monta todos os registros
       const entries=[]; let refid=0,winback=0;
@@ -524,7 +517,7 @@ document.getElementById('mailing-input').addEventListener('change', async e => {
         const ativKey=Object.keys(r).find(k=>k.includes('ATIVA'));
         const ativRaw=ativKey?r[ativKey]:'';
         let ativacao='';
-        if(ativRaw){try{ativacao=new Date(ativRaw).toISOString().slice(0,10);}catch(err){}}
+        if(ativRaw){try{const d=ativRaw instanceof Date?ativRaw:new Date(ativRaw);if(!isNaN(d))ativacao=d.toISOString().slice(0,10);}catch(err){}}
         const localidade=(r['LOCALIDADE']||'').trim();
         entries.push([id,{
           _id:id, origem,
@@ -577,6 +570,15 @@ function statusesParaOrigem(origem){return STATUSES_BY_ORIGEM[origem]||STATUSES_
 
 window.showToast=(msg,tipo)=>{const t=document.getElementById('toast');t.textContent=msg;t.className=tipo==='ok'?'show green':'show';setTimeout(()=>t.className='',3000);};
 
+// ── Status filter render ──
+function renderStatusFilter(){
+  const row=document.getElementById('filter-row'); if(!row)return;
+  const origem=filterOrigem==='todos'?'google':filterOrigem;
+  const statuses=statusesParaOrigem(origem);
+  row.innerHTML=`<button class="filter-btn ${filterStatus==='todos'?'active':''}" data-status="todos">Todos</button>`+
+    statuses.map(s=>`<button class="filter-btn ${filterStatus===s?'active':''}" data-status="${s}">${STATUS_LABELS[s]||s}</button>`).join('');
+}
+
 // ── Origem filter ──
 document.getElementById('origem-row').addEventListener('click', e=>{
   const btn=e.target.closest('.filter-btn'); if(!btn)return;
@@ -586,7 +588,7 @@ document.getElementById('origem-row').addEventListener('click', e=>{
   tempoRow.style.display=filterOrigem==='refidelizacao'?'':'none';
   if(filterOrigem!=='refidelizacao')filterTempo='todos';
   filterStatus='todos';
-  document.querySelectorAll('#filter-row .filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.status==='todos'));
+  renderStatusFilter();
   renderList();
 });
 document.getElementById('tempo-row').addEventListener('click', e=>{
@@ -635,7 +637,7 @@ function renderList(){
     const data=getCRM(l._id), origem=origemLead(l), sel=l._id===selectedId?' selected':'';
     let dateLabel='';
     if(data.nextContact){const cls=data.nextContact<today?'overdue':data.nextContact===today?'today':'';const pre=data.nextContact<today?'⚠ ':'○ ';dateLabel=`<span class="lc-date ${cls}">${pre}${formatDate(data.nextContact)}</span>`;}
-    else{dateLabel=`<span class="lc-date overdue">Sem data</span>`;}
+    else{dateLabel=`<span class="lc-date">Sem data</span>`;}
     const ownerLine=data.owner?`<div class="lc-owner">✓ ${data.owner}</div>`:'';
     let urgencyBadge='';
     if(origem==='refidelizacao'){

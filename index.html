@@ -499,6 +499,8 @@ function extrairVelocidade(desc){const m=(desc||'').match(/(\d+)\s*mb/i);return 
 
 document.getElementById('mailing-input').addEventListener('change', async e => {
   const file=e.target.files[0]; if(!file)return;
+  const btn=document.getElementById('mailing-btn');
+  btn.disabled=true; btn.textContent='⏳ Lendo...';
   const reader=new FileReader();
   reader.onload=async ev=>{
     try{
@@ -506,24 +508,25 @@ document.getElementById('mailing-input').addEventListener('change', async e => {
       const wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array'});
       const ws=wb.Sheets[wb.SheetNames[0]];
       const rows=XLSX.utils.sheet_to_json(ws,{defval:''});
-      const obj={}; let refid=0,winback=0;
+
+      // monta todos os registros
+      const entries=[]; let refid=0,winback=0;
       rows.forEach(r=>{
         const status=(r['CONTRATO_STATUS']||'').trim().toUpperCase();
         const origem=status==='ATIVO'?'refidelizacao':'winback';
         const circuito=String(r['CIRCUITO']||'').trim();
         if(!circuito)return;
         const id='circ_'+circuito;
-        const descricao=r['PRODUTO_DESCRICAO']||r['PRODUTO_DESCRIÇÃO']||r['PRODUTO_DESCRIÇÃO']||'';
+        const descricao=r['PRODUTO_DESCRICAO']||r['PRODUTO_DESCRIÇÃO']||'';
         const ativKey=Object.keys(r).find(k=>k.includes('ATIVA'));
         const ativRaw=ativKey?r[ativKey]:'';
         let ativacao='';
-        if(ativRaw){try{ativacao=new Date(ativRaw).toISOString().slice(0,10);}catch(e){}}
+        if(ativRaw){try{ativacao=new Date(ativRaw).toISOString().slice(0,10);}catch(err){}}
         const localidade=(r['LOCALIDADE']||'').trim();
-        obj[id]={
+        entries.push([id,{
           _id:id, origem,
           nome:(r['CPF_CNPJ']||id).toString().trim()||id,
-          telefone:'',
-          localidade, busca_regiao:localidade,
+          telefone:'', localidade, busca_regiao:localidade,
           cluster:(r['CLUSTER']||'').trim(),
           segmento:(r['SEGMENTO']||'').trim(),
           produto_descricao:descricao,
@@ -532,12 +535,27 @@ document.getElementById('mailing-input').addEventListener('change', async e => {
           modem_propriedade:(r['MODEM_PROPRIEDADE']||'').trim(),
           circuito,
           cpf_cnpj:(r['CPF_CNPJ']||'').toString().trim(),
-        };
+        }]);
         if(origem==='refidelizacao')refid++;else winback++;
       });
-      await update(ref(db,'leads'),obj);
-      showToast('Mailing: '+refid+' refidelização, '+winback+' winback','ok');
-    }catch(err){showToast('Erro ao importar: '+err.message);}
+
+      // grava em lotes de 300 para não travar o Firebase
+      const CHUNK=300;
+      const total=entries.length;
+      for(let i=0;i<total;i+=CHUNK){
+        const chunk=entries.slice(i,i+CHUNK);
+        const obj=Object.fromEntries(chunk);
+        await update(ref(db,'leads'),obj);
+        const pct=Math.round(((i+chunk.length)/total)*100);
+        btn.textContent=`⏳ ${pct}%`;
+      }
+
+      btn.disabled=false; btn.innerHTML='📋 Mailing';
+      showToast(`Mailing: ${refid} refidelização, ${winback} winback — ${total} registros`,'ok');
+    }catch(err){
+      btn.disabled=false; btn.innerHTML='📋 Mailing';
+      showToast('Erro ao importar: '+err.message);
+    }
   };
   reader.readAsArrayBuffer(file); e.target.value='';
 });

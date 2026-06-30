@@ -292,8 +292,11 @@
           <button class="filter-btn" data-tempo="2-5anos">2–5 anos</button>
           <button class="filter-btn" data-tempo="5mais">5+ anos</button>
         </div>
-        <div class="filter-row" id="city-row">
-          <button class="filter-btn active" data-city="todas">Todas cidades</button>
+        <div style="display:flex;align-items:center;gap:8px">
+          <select id="city-select" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:4px 10px;font-size:12px;outline:none;cursor:pointer;flex:1;max-width:220px">
+            <option value="todas">📍 Todas as localidades</option>
+          </select>
+          <span id="city-label" style="font-size:11px;color:var(--muted);display:none"></span>
         </div>
       </div>
       <div id="lead-list"></div>
@@ -598,10 +601,19 @@ function getCidades(){
   return [...new Set(leads.map(l=>l.localidade||(l.busca_regiao||'').split(',')[0].trim()).filter(Boolean))].sort();
 }
 function renderCityFilter(){
-  const row=document.getElementById('city-row'), cidades=getCidades();
-  row.innerHTML=`<button class="filter-btn ${filterCity==='todas'?'active':''}" data-city="todas">Todas cidades</button>`+
-    cidades.map(c=>`<button class="filter-btn ${filterCity===c?'active':''}" data-city="${c}">${c}</button>`).join('');
-  row.querySelectorAll('.filter-btn').forEach(btn=>btn.addEventListener('click',()=>{filterCity=btn.dataset.city;renderCityFilter();renderList();}));
+  const sel=document.getElementById('city-select');
+  if(!sel)return;
+  const cidades=getCidades();
+  sel.innerHTML=`<option value="todas">📍 Todas as localidades</option>`+
+    cidades.map(c=>`<option value="${c}" ${filterCity===c?'selected':''}>${c}</option>`).join('');
+  sel.value=filterCity;
+  sel.onchange=()=>{
+    filterCity=sel.value;
+    const lbl=document.getElementById('city-label');
+    if(filterCity!=='todas'){lbl.textContent=filterCity;lbl.style.display='';}
+    else lbl.style.display='none';
+    renderList();
+  };
 }
 function filteredLeads(){
   return leads.filter(l=>{

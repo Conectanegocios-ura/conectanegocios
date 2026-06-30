@@ -276,7 +276,11 @@
           <button class="filter-btn origem-refid" data-origem="refidelizacao">Refidelização</button>
           <button class="filter-btn origem-winback" data-origem="winback">Winback</button>
         </div>
-        <div class="filter-row" id="filter-row"></div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <select id="status-select" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:4px 10px;font-size:12px;outline:none;cursor:pointer;flex:1;max-width:220px">
+            <option value="todos">📋 Todos os status</option>
+          </select>
+        </div>
         <div class="filter-row" id="tempo-row" style="display:none">
           <button class="filter-btn active" data-tempo="todos">Todos</button>
           <button class="filter-btn tempo-janela" data-tempo="janela">🔥 Janela 9–11m</button>
@@ -574,11 +578,13 @@ window.showToast=(msg,tipo)=>{const t=document.getElementById('toast');t.textCon
 
 // ── Status filter render ──
 function renderStatusFilter(){
-  const row=document.getElementById('filter-row'); if(!row)return;
+  const sel=document.getElementById('status-select'); if(!sel)return;
   const origem=filterOrigem==='todos'?'google':filterOrigem;
   const statuses=statusesParaOrigem(origem);
-  row.innerHTML=`<button class="filter-btn ${filterStatus==='todos'?'active':''}" data-status="todos">Todos</button>`+
-    statuses.map(s=>`<button class="filter-btn ${filterStatus===s?'active':''}" data-status="${s}">${STATUS_LABELS[s]||s}</button>`).join('');
+  sel.innerHTML=`<option value="todos">📋 Todos os status</option>`+
+    statuses.map(s=>`<option value="${s}" ${filterStatus===s?'selected':''}>${STATUS_LABELS[s]||s}</option>`).join('');
+  sel.value=filterStatus;
+  sel.onchange=()=>{filterStatus=sel.value;renderList();};
 }
 
 // ── Origem filter ──
@@ -799,12 +805,6 @@ window.apossarLead=async()=>{if(!selectedId)return;const d=getCRM(selectedId);if
 window.liberarLead=async()=>{if(!selectedId)return;const d=getCRM(selectedId);const act=[...(d.activity||[]),{action:'Lead liberado',vendedor:nomeVendedor(),ts:Date.now()}];await saveCRM(selectedId,{owner:'',ownerEmail:'',ownerPhoto:'',activity:act});showToast('Lead liberado');};
 
 document.getElementById('search').addEventListener('input',e=>{searchQuery=e.target.value;renderList();});
-document.getElementById('filter-row').addEventListener('click',e=>{
-  const btn=e.target.closest('.filter-btn');if(!btn)return;
-  filterStatus=btn.dataset.status;
-  document.querySelectorAll('#filter-row .filter-btn').forEach(b=>b.classList.toggle('active',b===btn));
-  renderList();
-});
 
 // ── Relatórios ──
 window.openReports=()=>{renderReports();document.getElementById('reports-overlay').classList.add('open');};

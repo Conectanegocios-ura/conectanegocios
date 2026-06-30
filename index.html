@@ -523,7 +523,13 @@ document.getElementById('mailing-input').addEventListener('change', async e => {
         const ativKey=Object.keys(r).find(k=>k.includes('ATIVA'));
         const ativRaw=ativKey?r[ativKey]:'';
         let ativacao='';
-        if(ativRaw){try{const d=ativRaw instanceof Date?ativRaw:new Date(ativRaw);if(!isNaN(d))ativacao=d.toISOString().slice(0,10);}catch(err){}}
+        if(ativRaw){try{
+          let d;
+          if(ativRaw instanceof Date){d=ativRaw;}
+          else if(typeof ativRaw==='number'&&ativRaw>1000){d=new Date(new Date(1899,11,30).getTime()+ativRaw*86400000);}
+          else{d=new Date(ativRaw);}
+          if(d&&!isNaN(d))ativacao=d.toISOString().slice(0,10);
+        }catch(err){}}
         const localidade=(r['LOCALIDADE']||'').trim();
         entries.push([id,{
           _id:id, origem,

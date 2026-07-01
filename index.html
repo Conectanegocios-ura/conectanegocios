@@ -3,9 +3,9 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --bg:#0D1117; --surface:#131C2B; --surface2:#1A2540;
-    --border:#1E2D45; --border2:#263550; --text:#C8D4E8;
-    --muted:#5A6E8C; --accent:#3D7EF5; --accent-dim:#1E3A7A;
+    --bg:#F8FAFC; --surface:#FFFFFF; --surface2:#F1F5F9;
+    --border:#E2E8F0; --border2:#CBD5E1; --text:#1E293B;
+    --muted:#64748B; --accent:#3D7EF5; --accent-dim:#DBEAFE;
     --s-novo:#5A6E8C; --s-contato:#F5A623; --s-qualificado:#3D7EF5;
     --s-negociando:#A855F7; --s-fechado:#10B981; --s-descartado:#EF4444;
     --s-contato_feito:#F5A623; --s-oferta_apresentada:#3D7EF5;
@@ -173,7 +173,7 @@
   .nc-label { font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin-bottom:4px; }
   .nc-hint { font-size:11px; color:#EF4444; margin-top:4px; display:none; }
   .next-contact-block.required .nc-hint { display:block; }
-  input[type="date"] { background:var(--surface); border:1px solid var(--border2); color:var(--text); border-radius:6px; padding:7px 10px; font-size:13px; outline:none; color-scheme:dark; cursor:pointer; }
+  input[type="date"] { background:var(--surface); border:1px solid var(--border2); color:var(--text); border-radius:6px; padding:7px 10px; font-size:13px; outline:none; color-scheme:light; cursor:pointer; }
 
   /* ── WhatsApp ── */
   .wa-block { background:var(--surface2); border:1px solid var(--border2); border-radius:8px; padding:14px 18px; margin-bottom:24px; display:flex; align-items:center; justify-content:space-between; gap:16px; }
@@ -245,7 +245,10 @@
 
 <div id="app">
   <header>
-    <h1>CRM Leads</h1>
+    <div>
+      <h1>CRM Leads</h1>
+      <div style="font-size:10px;color:var(--muted);letter-spacing:.04em;margin-top:1px">Crescer Nos Conecta!</div>
+    </div>
     <div class="user-chip" id="user-chip"></div>
     <span style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)">
       <span class="sync-dot" id="sync-dot" style="background:var(--muted)"></span>

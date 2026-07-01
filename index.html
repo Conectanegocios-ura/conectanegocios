@@ -374,7 +374,7 @@ function mesesDesdeAtivacao(lead) {
   const ativ = new Date(lead.contrato_ativacao);
   if (isNaN(ativ)) return null;
   const hoje = new Date();
-  return (hoje.getFullYear() - ativ.getFullYear()) * 12 + (hoje.getMonth() - ativ.getMonth());
+  return (hoje.getUTCFullYear() - ativ.getUTCFullYear()) * 12 + (hoje.getUTCMonth() - ativ.getUTCMonth());
 }
 function faixaTempo(meses) {
   if (meses === null) return null;

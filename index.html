@@ -6,11 +6,8 @@
     --bg:#F8FAFC; --surface:#FFFFFF; --surface2:#F1F5F9;
     --border:#E2E8F0; --border2:#CBD5E1; --text:#1E293B;
     --muted:#64748B; --accent:#3D7EF5; --accent-dim:#DBEAFE;
-    --s-novo:#5A6E8C; --s-contato:#F5A623; --s-qualificado:#3D7EF5;
-    --s-negociando:#A855F7; --s-fechado:#10B981; --s-descartado:#EF4444;
-    --s-contato_feito:#F5A623; --s-oferta_apresentada:#3D7EF5;
-    --s-upgrade_aceito:#10B981; --s-retornou:#10B981;
-    --s-recusou:#EF4444; --s-reagendar:#A855F7;
+    --s-novo:#94A3B8; --s-em_contato:#F5A623; --s-qualificado:#3D7EF5;
+    --s-proposta:#A855F7; --s-negociando:#0EA5E9; --s-concluido:#10B981; --s-perdido:#EF4444;
   }
   html, body { height:100%; background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,sans-serif; font-size:14px; line-height:1.5; }
 
@@ -113,21 +110,20 @@
   .origem-tag.google { background:rgba(61,126,245,.15); color:#3D7EF5; }
   .origem-tag.refidelizacao { background:rgba(16,185,129,.15); color:#10B981; }
   .origem-tag.winback { background:rgba(245,166,35,.15); color:#F5A623; }
-  .status-novo{border-left-color:var(--s-novo)} .status-contato{border-left-color:var(--s-contato)}
-  .status-qualificado{border-left-color:var(--s-qualificado)} .status-negociando{border-left-color:var(--s-negociando)}
-  .status-fechado{border-left-color:var(--s-fechado)} .status-descartado{border-left-color:var(--s-descartado)}
-  .status-contato_feito{border-left-color:var(--s-contato_feito)} .status-oferta_apresentada{border-left-color:var(--s-oferta_apresentada)}
-  .status-upgrade_aceito{border-left-color:var(--s-upgrade_aceito)} .status-retornou{border-left-color:var(--s-retornou)}
-  .status-recusou{border-left-color:var(--s-recusou)} .status-reagendar{border-left-color:var(--s-reagendar)}
-  .badge-novo{background:rgba(90,110,140,.2);color:var(--s-novo)} .badge-contato{background:rgba(245,166,35,.15);color:var(--s-contato)}
-  .badge-qualificado{background:rgba(61,126,245,.15);color:var(--s-qualificado)} .badge-negociando{background:rgba(168,85,247,.15);color:var(--s-negociando)}
-  .badge-fechado{background:rgba(16,185,129,.15);color:var(--s-fechado)} .badge-descartado{background:rgba(239,68,68,.15);color:var(--s-descartado)}
-  .badge-contato_feito{background:rgba(245,166,35,.15);color:var(--s-contato_feito)}
-  .badge-oferta_apresentada{background:rgba(61,126,245,.15);color:var(--s-oferta_apresentada)}
-  .badge-upgrade_aceito{background:rgba(16,185,129,.15);color:var(--s-upgrade_aceito)}
-  .badge-retornou{background:rgba(16,185,129,.15);color:var(--s-retornou)}
-  .badge-recusou{background:rgba(239,68,68,.15);color:var(--s-recusou)}
-  .badge-reagendar{background:rgba(168,85,247,.15);color:var(--s-reagendar)}
+  .status-novo{border-left-color:var(--s-novo)}
+  .status-em_contato{border-left-color:var(--s-em_contato)}
+  .status-qualificado{border-left-color:var(--s-qualificado)}
+  .status-proposta{border-left-color:var(--s-proposta)}
+  .status-negociando{border-left-color:var(--s-negociando)}
+  .status-concluido{border-left-color:var(--s-concluido)}
+  .status-perdido{border-left-color:var(--s-perdido)}
+  .badge-novo{background:rgba(148,163,184,.15);color:var(--s-novo)}
+  .badge-em_contato{background:rgba(245,166,35,.15);color:var(--s-em_contato)}
+  .badge-qualificado{background:rgba(61,126,245,.15);color:var(--s-qualificado)}
+  .badge-proposta{background:rgba(168,85,247,.15);color:var(--s-proposta)}
+  .badge-negociando{background:rgba(14,165,233,.15);color:var(--s-negociando)}
+  .badge-concluido{background:rgba(16,185,129,.15);color:var(--s-concluido)}
+  .badge-perdido{background:rgba(239,68,68,.15);color:var(--s-perdido)}
 
   /* ── Detail ── */
   #detail-panel { overflow-y:auto; padding:28px 32px; }
@@ -320,10 +316,12 @@ const EMAILS_PERMITIDOS = [
   "rogeriocastro@conectanegocios.biz",
   "roque@conectanegocios.biz",
   "israel@conectanegocios.biz",
+  "andre@conectanegocios.biz",
 ];
 const EMAILS_GESTORES = [
   "israel@conectanegocios.biz",
   "rogeriocastro@conectanegocios.biz",
+  "andre@conectanegocios.biz",
 ];
 
 const firebaseConfig = {
@@ -355,18 +353,16 @@ let leadModificado = false;
 let listPage = 1;
 const PAGE_SIZE = 80;
 
-// ── Status funnels por origem ──
-const STATUSES_BY_ORIGEM = {
-  google:        ['novo','contato','qualificado','negociando','fechado','descartado'],
-  refidelizacao: ['novo','contato_feito','oferta_apresentada','upgrade_aceito','recusou','reagendar'],
-  winback:       ['novo','contato_feito','oferta_apresentada','retornou','recusou','reagendar'],
-};
+// ── Status unificado ──
+const STATUSES = ['novo','em_contato','qualificado','proposta','negociando','concluido','perdido'];
 const STATUS_LABELS = {
-  novo:'Novo', contato:'Em Contato', qualificado:'Qualificado',
-  negociando:'Negociando', fechado:'Fechado', descartado:'Descartado',
-  contato_feito:'Contato Feito', oferta_apresentada:'Oferta Apresentada',
-  upgrade_aceito:'Upgrade Aceito', retornou:'Retornou',
-  recusou:'Recusou', reagendar:'Reagendar',
+  novo:'Lead Novo', em_contato:'Em Contato', qualificado:'Qualificado',
+  proposta:'Proposta Apresentada', negociando:'Em Negociação',
+  concluido:'Venda Concluída', perdido:'Venda Perdida',
+  // compatibilidade com dados antigos
+  contato:'Em Contato', contato_feito:'Em Contato', oferta_apresentada:'Proposta Apresentada',
+  upgrade_aceito:'Venda Concluída', retornou:'Venda Concluída', fechado:'Venda Concluída',
+  descartado:'Venda Perdida', recusou:'Venda Perdida', reagendar:'Em Contato',
 };
 
 const WA_SVG = `<svg class="wa-icon" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.555 4.116 1.529 5.845L.057 23.143a.75.75 0 00.916.916l5.298-1.472A11.953 11.953 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.907 0-3.693-.504-5.23-1.385l-.374-.217-3.882 1.079 1.08-3.88-.218-.374A10 10 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>`;
@@ -581,17 +577,15 @@ function waURL(t){let d=limparTel(t);if(d.length<=11)d='55'+d;return 'https://wa
 function rotinaConcluida(data){return data.status!=='novo'&&!!data.nextContact&&!!(data.notes&&data.notes.trim());}
 function nomeVendedor(){return currentUser?.displayName||currentUser?.email||'Vendedor';}
 function origemLead(l){return l.origem||'google';}
-function statusesParaOrigem(origem){return STATUSES_BY_ORIGEM[origem]||STATUSES_BY_ORIGEM.google;}
+function statusesParaOrigem(){return STATUSES;}
 
 window.showToast=(msg,tipo)=>{const t=document.getElementById('toast');t.textContent=msg;t.className=tipo==='ok'?'show green':'show';setTimeout(()=>t.className='',3000);};
 
 // ── Status filter render ──
 function renderStatusFilter(){
   const sel=document.getElementById('status-select'); if(!sel)return;
-  const origem=filterOrigem==='todos'?'google':filterOrigem;
-  const statuses=statusesParaOrigem(origem);
   sel.innerHTML=`<option value="todos">📋 Todos os status</option>`+
-    statuses.map(s=>`<option value="${s}" ${filterStatus===s?'selected':''}>${STATUS_LABELS[s]||s}</option>`).join('');
+    STATUSES.map(s=>`<option value="${s}" ${filterStatus===s?'selected':''}>${STATUS_LABELS[s]}</option>`).join('');
   sel.value=filterStatus;
   sel.onchange=()=>{filterStatus=sel.value;renderList();};
 }
@@ -602,7 +596,7 @@ document.getElementById('origem-row').addEventListener('click', e=>{
   filterOrigem=btn.dataset.origem;
   document.querySelectorAll('#origem-row .filter-btn').forEach(b=>b.classList.toggle('active',b===btn));
   const tempoRow=document.getElementById('tempo-row');
-  tempoRow.style.display=filterOrigem==='refidelizacao'?'':'none';
+  tempoRow.style.display=filterOrigem==='refidelizacao'?'flex':'none';
   if(filterOrigem!=='refidelizacao')filterTempo='todos';
   filterStatus='todos';
   renderStatusFilter();
@@ -689,11 +683,15 @@ function _doRenderList(resetPage=true){
   list.querySelectorAll('.lead-card').forEach(el=>el.addEventListener('click',()=>selectLead(el.dataset.id)));
 }
 window.loadMoreLeads=()=>{listPage++;renderList(false);};
+const STATUS_CONCLUIDO=['concluido','fechado','upgrade_aceito','retornou'];
+const STATUS_PERDIDO=['perdido','descartado','recusou'];
+const STATUS_CONTATO=['em_contato','contato','contato_feito','reagendar'];
+const STATUS_QUALIFICADO=['qualificado','oferta_apresentada','proposta'];
 function updateStats(){
   document.getElementById('cnt-total').textContent=leads.length;
-  document.getElementById('cnt-contato').textContent=leads.filter(l=>['contato','contato_feito'].includes(getCRM(l._id).status)).length;
-  document.getElementById('cnt-qualificado').textContent=leads.filter(l=>['qualificado','oferta_apresentada'].includes(getCRM(l._id).status)).length;
-  document.getElementById('cnt-fechado').textContent=leads.filter(l=>['fechado','upgrade_aceito','retornou'].includes(getCRM(l._id).status)).length;
+  document.getElementById('cnt-contato').textContent=leads.filter(l=>STATUS_CONTATO.includes(getCRM(l._id).status)).length;
+  document.getElementById('cnt-qualificado').textContent=leads.filter(l=>STATUS_QUALIFICADO.includes(getCRM(l._id).status)).length;
+  document.getElementById('cnt-fechado').textContent=leads.filter(l=>STATUS_CONCLUIDO.includes(getCRM(l._id).status)).length;
 }
 
 function selectLead(id){
@@ -723,7 +721,7 @@ function renderDetail(){
   const panel=document.getElementById('detail-panel'); if(!selectedId)return;
   const lead=leads.find(l=>l._id===selectedId); if(!lead)return;
   const data=getCRM(lead._id), origem=origemLead(lead);
-  const statuses=statusesParaOrigem(origem);
+  const statuses=statusesParaOrigem();
   const statusOpts=statuses.map(s=>`<option value="${s}" ${data.status===s?'selected':''}>${STATUS_LABELS[s]||s}</option>`).join('');
 
   let bannerHTML='';
@@ -829,10 +827,10 @@ function renderReports(){
     const d=getCRM(l._id), origem=origemLead(l);
     byStatus[d.status]=(byStatus[d.status]||0)+1;
     byOrigem[origem]=(byOrigem[origem]||0)+1;
-    if(d.owner){byVendor[d.owner]=byVendor[d.owner]||{total:0,convertido:0,contato:0};byVendor[d.owner].total++;if(['fechado','upgrade_aceito','retornou'].includes(d.status))byVendor[d.owner].convertido++;if(['contato','contato_feito'].includes(d.status))byVendor[d.owner].contato++;}
+    if(d.owner){byVendor[d.owner]=byVendor[d.owner]||{total:0,convertido:0,contato:0};byVendor[d.owner].total++;if(STATUS_CONCLUIDO.includes(d.status))byVendor[d.owner].convertido++;if(STATUS_CONTATO.includes(d.status))byVendor[d.owner].contato++;}
     const cidade=l.localidade||(l.busca_regiao||'').split(',')[0].trim();
     if(cidade)byCity[cidade]=(byCity[cidade]||0)+1;
-    if(d.nextContact&&d.nextContact<today&&!['fechado','descartado','upgrade_aceito','retornou','recusou'].includes(d.status)){atrasados.push({nome:l.nome,id:l._id,data:d.nextContact,owner:d.owner||'—',cidade});}
+    if(d.nextContact&&d.nextContact<today&&![...STATUS_CONCLUIDO,...STATUS_PERDIDO].includes(d.status)){atrasados.push({nome:l.nome,id:l._id,data:d.nextContact,owner:d.owner||'—',cidade});}
     if(origem==='refidelizacao'){
       const meses=mesesDesdeAtivacao(l),ft=faixaTempo(meses);
       if(ft==='janela')janelaAtivos.push({nome:l.nome,id:l._id,meses,cidade,velocidade:l.velocidade,status:d.status});
@@ -840,8 +838,8 @@ function renderReports(){
     }
   });
 
-  const convertidos=leads.filter(l=>['fechado','upgrade_aceito','retornou'].includes(getCRM(l._id).status)).length;
-  const ativos=leads.length-(byStatus['descartado']||0)-(byStatus['recusou']||0)-convertidos;
+  const convertidos=leads.filter(l=>STATUS_CONCLUIDO.includes(getCRM(l._id).status)).length;
+  const ativos=leads.length-STATUS_PERDIDO.reduce((n,s)=>(byStatus[s]||0)+n,0)-convertidos;
 
   document.getElementById('rp-summary').innerHTML=[
     {val:leads.length,label:'Total de leads',color:'var(--accent)'},

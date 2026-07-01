@@ -201,6 +201,45 @@
   .cob-SEM_COBERTURA { background:rgba(239,68,68,.15); color:#EF4444; }
   .cob-SEM_CAPACIDADE { background:rgba(245,166,35,.15); color:#F5A623; }
 
+  /* ── Campanhas ── */
+  #camp-overlay { display:none; position:fixed; inset:0; background:rgba(7,17,31,.7); z-index:150; align-items:flex-start; justify-content:center; padding:40px 20px; overflow-y:auto; }
+  #camp-overlay.open { display:flex; }
+  .camp-panel { background:var(--surface); border:1px solid var(--border2); border-radius:14px; width:100%; max-width:960px; padding:32px 36px; }
+  .camp-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; }
+  .camp-title { font-size:18px; font-weight:700; }
+  .camp-close { background:none; border:none; color:var(--muted); font-size:22px; cursor:pointer; padding:4px 8px; border-radius:4px; }
+  .camp-close:hover { background:var(--surface2); color:var(--text); }
+  .camp-card { background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:18px 20px; margin-bottom:14px; }
+  .camp-card-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .camp-card-name { font-size:14px; font-weight:700; }
+  .camp-status-badge { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; padding:2px 8px; border-radius:3px; }
+  .camp-status-ativa { background:rgba(16,185,129,.15); color:#10B981; }
+  .camp-status-encerrada { background:rgba(148,163,184,.15); color:#94A3B8; }
+  .camp-meta { font-size:11px; color:var(--muted); display:flex; gap:16px; margin-bottom:12px; }
+  .camp-vendor-list { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:8px; }
+  .camp-vendor-card { background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:10px 12px; }
+  .camp-vendor-name { font-size:12px; font-weight:600; margin-bottom:4px; }
+  .camp-vendor-progress { font-size:11px; color:var(--muted); }
+  .camp-progress-bar { height:4px; background:var(--border); border-radius:2px; margin-top:6px; overflow:hidden; }
+  .camp-progress-fill { height:100%; background:var(--accent); border-radius:2px; transition:width .3s; }
+  .camp-form { background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:24px; margin-top:20px; }
+  .camp-form-title { font-size:13px; font-weight:700; margin-bottom:16px; color:var(--text); }
+  .camp-form-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
+  .camp-field { display:flex; flex-direction:column; gap:5px; }
+  .camp-field label { font-size:11px; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); }
+  .camp-field input, .camp-field select { background:var(--surface); border:1px solid var(--border2); color:var(--text); border-radius:6px; padding:7px 10px; font-size:13px; outline:none; }
+  .camp-field input:focus, .camp-field select:focus { border-color:var(--accent); }
+  .camp-vendors-check { display:flex; flex-wrap:wrap; gap:8px; }
+  .camp-vendor-chk { display:flex; align-items:center; gap:6px; background:var(--surface); border:1px solid var(--border2); border-radius:5px; padding:5px 10px; cursor:pointer; font-size:12px; }
+  .camp-vendor-chk input { accent-color:var(--accent); cursor:pointer; }
+  .camp-action-row { display:flex; justify-content:flex-end; gap:10px; margin-top:16px; }
+  .camp-btn-primary { background:var(--accent); color:#fff; border:none; border-radius:6px; padding:8px 20px; font-size:13px; font-weight:600; cursor:pointer; }
+  .camp-btn-primary:hover { opacity:.85; }
+  .camp-btn-secondary { background:var(--surface2); border:1px solid var(--border2); color:var(--text); border-radius:6px; padding:8px 16px; font-size:13px; cursor:pointer; }
+  .camp-btn-encerrar { background:rgba(239,68,68,.1); border:1px solid rgba(239,68,68,.3); color:#EF4444; border-radius:6px; padding:5px 12px; font-size:12px; cursor:pointer; }
+  .camp-btn-encerrar:hover { background:rgba(239,68,68,.2); }
+  .vendor-waiting { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; gap:14px; color:var(--muted); }
+
   /* ── Toast ── */
   #toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(8px); background:#EF4444; color:#fff; padding:10px 20px; border-radius:8px; font-size:13px; font-weight:500; opacity:0; pointer-events:none; transition:opacity .2s,transform .2s; z-index:999; }
   #toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
@@ -221,6 +260,47 @@
         Entrar com Google
       </button>
       <div class="login-disclaimer">Apenas usuários autorizados pela Conecta Tech<br>têm acesso ao sistema.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Campanhas overlay -->
+<div id="camp-overlay">
+  <div class="camp-panel">
+    <div class="camp-header">
+      <div class="camp-title">🚀 Campanhas de Leads</div>
+      <button class="camp-close" onclick="closeCampaigns()">✕</button>
+    </div>
+    <div id="camp-list"></div>
+    <div class="camp-form" id="camp-form" style="display:none">
+      <div class="camp-form-title">Nova Campanha</div>
+      <div class="camp-form-grid">
+        <div class="camp-field"><label>Nome da campanha</label><input type="text" id="cf-nome" placeholder="Ex: Refid Julho - Cravinhos"></div>
+        <div class="camp-field"><label>Data de encerramento</label><input type="date" id="cf-datafim"></div>
+        <div class="camp-field"><label>Tipo de lead (origem)</label>
+          <select id="cf-origem">
+            <option value="todos">Todos</option>
+            <option value="google">Google</option>
+            <option value="refidelizacao">Refidelização</option>
+            <option value="winback">Winback</option>
+          </select>
+        </div>
+        <div class="camp-field"><label>Localidade</label><select id="cf-localidade"><option value="todas">Todas</option></select></div>
+        <div class="camp-field"><label>Status dos leads elegíveis</label>
+          <select id="cf-status">
+            <option value="todos">Todos</option>
+          </select>
+        </div>
+        <div class="camp-field"><label>Leads por vendedor</label><input type="number" id="cf-qtd" value="40" min="1" max="500"></div>
+      </div>
+      <div class="camp-field" style="margin-bottom:14px">
+        <label>Vendedores participantes</label>
+        <div class="camp-vendors-check" id="cf-vendedores"></div>
+      </div>
+      <div class="camp-action-row">
+        <button class="camp-btn-secondary" onclick="document.getElementById('camp-form').style.display='none'">Cancelar</button>
+        <button class="camp-btn-primary" onclick="submeterCampanha()">Criar Campanha</button>
+      </div>
     </div>
   </div>
 </div>
@@ -257,6 +337,7 @@
       <span class="stat"><span class="dot" style="background:var(--s-fechado)"></span><strong id="cnt-fechado">0</strong> fechados</span>
     </div>
     <button class="reports-btn" id="reports-btn" onclick="openReports()" style="display:none">📊 Relatórios</button>
+    <button class="reports-btn" id="camp-btn" onclick="openCampaigns()" style="display:none;background:var(--accent);color:#fff;border-color:var(--accent)">🚀 Campanhas</button>
   </header>
 
   <div id="main">
@@ -352,6 +433,8 @@ let searchQuery    = '';
 let leadModificado = false;
 let listPage = 1;
 const PAGE_SIZE = 80;
+let campanhas = {};
+let leadsDisparo = {};
 
 // ── Status unificado ──
 const STATUSES = ['novo','em_contato','qualificado','proposta','negociando','concluido','perdido'];
@@ -366,6 +449,67 @@ const STATUS_LABELS = {
 };
 
 const WA_SVG = `<svg class="wa-icon" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.555 4.116 1.529 5.845L.057 23.143a.75.75 0 00.916.916l5.298-1.472A11.953 11.953 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.907 0-3.693-.504-5.23-1.385l-.374-.217-3.882 1.079 1.08-3.88-.218-.374A10 10 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>`;
+
+// ── Helpers de campanha ──
+function safeKey(email){ return (email||'').replace(/\./g,'_').replace(/@/g,'__'); }
+function isGestor(){ return currentUser && EMAILS_GESTORES.includes(currentUser.email); }
+function myKey(){ return safeKey(currentUser?.email||''); }
+function vendedoresNaoGestores(){ return EMAILS_PERMITIDOS.filter(e=>!EMAILS_GESTORES.includes(e)); }
+
+function getLeadsParaVendedor(){
+  const hoje = new Date().toISOString().slice(0,10);
+  const ids = new Set();
+  Object.values(campanhas).forEach(camp=>{
+    if(camp.status!=='ativa') return;
+    if(camp.dataFim && camp.dataFim < hoje) return;
+    const v = camp.vendedores?.[myKey()];
+    if(v) (v.leads||[]).forEach(id=>ids.add(id));
+  });
+  return [...ids];
+}
+
+function leadTrabalhado(id){
+  const d=getCRM(id);
+  return d.status!=='novo'||!!(d.notes&&d.notes.trim());
+}
+
+function leadsElegiveis(filtros){
+  const hoje30=new Date(); hoje30.setDate(hoje30.getDate()-30);
+  const hoje30str=hoje30.toISOString().slice(0,10);
+  const jaAtribuidos=new Set();
+  Object.values(campanhas).forEach(camp=>{
+    if(camp.status!=='ativa') return;
+    Object.values(camp.vendedores||{}).forEach(v=>(v.leads||[]).forEach(id=>jaAtribuidos.add(id)));
+  });
+  return leads.filter(l=>{
+    if(jaAtribuidos.has(l._id)) return false;
+    if(filtros.origem&&filtros.origem!=='todos'&&(l.origem||'google')!==filtros.origem) return false;
+    if(filtros.localidade&&filtros.localidade!=='todas'&&l.localidade!==filtros.localidade) return false;
+    const d=getCRM(l._id);
+    if(filtros.status_lead&&filtros.status_lead!=='todos'&&d.status!==filtros.status_lead) return false;
+    const disparo=leadsDisparo[l._id];
+    if(disparo&&disparo>hoje30str&&leadTrabalhado(l._id)) return false;
+    return true;
+  });
+}
+
+async function checkReabastecimento(){
+  for(const [campId,camp] of Object.entries(campanhas)){
+    if(camp.status!=='ativa') continue;
+    for(const [vKey,v] of Object.entries(camp.vendedores||{})){
+      if(v.status!=='ativo') continue;
+      const todos=(v.leads||[]).every(id=>leadTrabalhado(id));
+      if(!todos) continue;
+      const novos=leadsElegiveis(camp.filtros||{}).slice(0,camp.qtd_por_vendedor||40);
+      if(!novos.length){ showToast('Pool esgotado para '+v.email); continue; }
+      const ids=novos.map(l=>l._id);
+      const patch={}; ids.forEach(id=>{patch[id]=new Date().toISOString().slice(0,10);});
+      await update(ref(db,`campanhas/${campId}/vendedores/${vKey}`),{leads:ids});
+      await update(ref(db,'leads_disparo'),patch);
+      showToast('Novo lote enviado para '+v.nome,'ok');
+    }
+  }
+}
 
 // ── Helpers de tempo ──
 function mesesDesdeAtivacao(lead) {
@@ -423,7 +567,7 @@ onAuthStateChanged(auth, user => {
       ${user.photoURL ? `<img src="${user.photoURL}" alt="">` : ''}
       <span>${user.displayName || user.email}</span>
       <button class="logout-btn" onclick="logoutUser()">Sair</button>`;
-    if (EMAILS_GESTORES.includes(user.email)) document.getElementById('reports-btn').style.display = '';
+    atualizarUIperfil();
     iniciarSync();
   } else {
     document.getElementById('login-screen').classList.remove('hidden');
@@ -449,6 +593,14 @@ function iniciarSync() {
     renderList();
     if (selectedId) renderDetail();
     updateStats();
+  });
+  onValue(ref(db, 'campanhas'), snap => {
+    campanhas = snap.val() || {};
+    renderList();
+    updateStats();
+  });
+  onValue(ref(db, 'leads_disparo'), snap => {
+    leadsDisparo = snap.val() || {};
   });
 }
 function setSyncStatus(s) {
@@ -629,7 +781,8 @@ function renderCityFilter(){
   };
 }
 function filteredLeads(){
-  return leads.filter(l=>{
+  const base = isGestor() ? leads : leads.filter(l=>getLeadsParaVendedor().includes(l._id));
+  return base.filter(l=>{
     const d=getCRM(l._id), origem=origemLead(l);
     if(filterOrigem!=='todos'&&origem!==filterOrigem)return false;
     if(filterStatus!=='todos'&&d.status!==filterStatus)return false;
@@ -640,6 +793,18 @@ function filteredLeads(){
     return true;
   });
 }
+function atualizarUIperfil(){
+  const gestor=isGestor();
+  const campBtn=document.getElementById('camp-btn');
+  const rptBtn=document.getElementById('reports-btn');
+  const loadBtn=document.getElementById('load-btn');
+  const mailBtn=document.getElementById('mailing-btn');
+  if(campBtn) campBtn.style.display=gestor?'':'none';
+  if(rptBtn) rptBtn.style.display=gestor?'':'none';
+  if(loadBtn) loadBtn.style.display=gestor?'':'none';
+  if(mailBtn) mailBtn.style.display=gestor?'':'none';
+}
+
 let _renderTimer=null;
 function renderList(resetPage=true){
   if(_renderTimer)clearTimeout(_renderTimer);
@@ -648,7 +813,14 @@ function renderList(resetPage=true){
 function _doRenderList(resetPage=true){
   if(resetPage)listPage=1;
   const list=document.getElementById('lead-list'), fl=filteredLeads();
-  if(!fl.length){list.innerHTML='<div class="no-leads">Nenhum lead encontrado</div>';return;}
+  if(!fl.length){
+    if(!isGestor()&&!getLeadsParaVendedor().length){
+      list.innerHTML='<div class="vendor-waiting"><svg width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2" opacity=".3"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><p style="font-size:13px;font-weight:600">Aguardando leads</p><p style="font-size:12px;text-align:center;max-width:220px">Nenhuma campanha ativa no momento. O gestor irá liberar seus leads em breve.</p></div>';
+    } else {
+      list.innerHTML='<div class="no-leads">Nenhum lead encontrado</div>';
+    }
+    return;
+  }
   const visible=fl.slice(0,listPage*PAGE_SIZE);
   const hasMore=visible.length<fl.length;
   const today=new Date().toISOString().slice(0,10);
@@ -805,7 +977,7 @@ function renderDetail(){
 // ── Actions ──
 window.changeStatus=async v=>{if(!selectedId)return;leadModificado=true;const d=getCRM(selectedId);const old=d.status;const act=[...(d.activity||[]),{status:v,action:`${STATUS_LABELS[old]||old} → ${STATUS_LABELS[v]||v}`,vendedor:nomeVendedor(),ts:Date.now()}];await saveCRM(selectedId,{status:v,activity:act});};
 window.saveNextContact=async v=>{if(!selectedId)return;leadModificado=true;const d=getCRM(selectedId);const act=[...(d.activity||[]),{action:'Data de contato definida',note:formatDate(v),vendedor:nomeVendedor(),ts:Date.now()}];await saveCRM(selectedId,{nextContact:v,activity:act});document.getElementById('nc-block')?.classList.toggle('required',!v);};
-window.saveNotes=async()=>{if(!selectedId)return;leadModificado=true;const ta=document.getElementById('notes-ta');const d=getCRM(selectedId);const prev=ta.value.slice(0,60)+(ta.value.length>60?'…':'');const act=[...(d.activity||[]),{action:'Anotação salva',note:prev,vendedor:nomeVendedor(),ts:Date.now()}];await saveCRM(selectedId,{notes:ta.value,activity:act});showToast('Anotação salva','ok');};
+window.saveNotes=async()=>{if(!selectedId)return;leadModificado=true;const ta=document.getElementById('notes-ta');const d=getCRM(selectedId);const prev=ta.value.slice(0,60)+(ta.value.length>60?'…':'');const act=[...(d.activity||[]),{action:'Anotação salva',note:prev,vendedor:nomeVendedor(),ts:Date.now()}];await saveCRM(selectedId,{notes:ta.value,activity:act});showToast('Anotação salva','ok');checkReabastecimento();};
 window.saveTelefone=async v=>{if(!selectedId)return;leadModificado=true;await saveCRM(selectedId,{telefone_editado:v});const lead=leads.find(l=>l._id===selectedId);const data=getCRM(selectedId);data.telefone_editado=v;const wb=document.getElementById('wa-block');if(wb)wb.innerHTML=buildWABlock(lead,data);};
 window.toggleWhatsapp=async c=>{if(!selectedId)return;const d=getCRM(selectedId);const act=[...(d.activity||[]),{action:c?'WhatsApp confirmado':'WhatsApp desmarcado',vendedor:nomeVendedor(),ts:Date.now()}];await saveCRM(selectedId,{whatsapp:c,activity:act});};
 window.apossarLead=async()=>{if(!selectedId)return;const d=getCRM(selectedId);if(d.owner)return showToast('Lead já assumido por '+d.owner);const act=[...(d.activity||[]),{action:'Lead assumido',note:nomeVendedor(),vendedor:nomeVendedor(),ts:Date.now()}];await saveCRM(selectedId,{owner:nomeVendedor(),ownerEmail:currentUser?.email||'',ownerPhoto:currentUser?.photoURL||'',activity:act});showToast('Você assumiu este lead!','ok');};
@@ -817,6 +989,122 @@ document.getElementById('search').addEventListener('input',e=>{searchQuery=e.tar
 window.openReports=()=>{renderReports();document.getElementById('reports-overlay').classList.add('open');};
 window.closeReports=()=>{document.getElementById('reports-overlay').classList.remove('open');};
 document.getElementById('reports-overlay').addEventListener('click',e=>{if(e.target===document.getElementById('reports-overlay'))closeReports();});
+document.getElementById('camp-overlay').addEventListener('click',e=>{if(e.target===document.getElementById('camp-overlay'))closeCampaigns();});
+
+// ── Campanhas ──
+window.openCampaigns=()=>{ renderCampaigns(); document.getElementById('camp-overlay').classList.add('open'); };
+window.closeCampaigns=()=>{ document.getElementById('camp-overlay').classList.remove('open'); };
+
+function renderCampaigns(){
+  const hoje=new Date().toISOString().slice(0,10);
+  const list=document.getElementById('camp-list');
+  const camps=Object.values(campanhas).sort((a,b)=>(b._id||'').localeCompare(a._id||''));
+
+  list.innerHTML = camps.length ? camps.map(camp=>{
+    const vends=Object.values(camp.vendedores||{});
+    const vHTML=vends.map(v=>{
+      const total=(v.leads||[]).length;
+      const trabalhados=(v.leads||[]).filter(id=>leadTrabalhado(id)).length;
+      const pct=total?Math.round((trabalhados/total)*100):0;
+      return `<div class="camp-vendor-card">
+        <div class="camp-vendor-name">${v.nome||v.email}</div>
+        <div class="camp-vendor-progress">${trabalhados}/${total} trabalhados</div>
+        <div class="camp-progress-bar"><div class="camp-progress-fill" style="width:${pct}%"></div></div>
+      </div>`;
+    }).join('');
+    const encerrada=camp.status==='encerrada'||(camp.dataFim&&camp.dataFim<hoje);
+    const badgeClass=encerrada?'camp-status-encerrada':'camp-status-ativa';
+    const badgeLabel=encerrada?'Encerrada':'Ativa';
+    const encBtn=!encerrada?`<button class="camp-btn-encerrar" onclick="encerrarCampanha('${camp._id}')">Encerrar</button>`:'';
+    return `<div class="camp-card">
+      <div class="camp-card-header">
+        <div class="camp-card-name">${camp.nome||'Sem nome'}</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="camp-status-badge ${badgeClass}">${badgeLabel}</span>
+          ${encBtn}
+        </div>
+      </div>
+      <div class="camp-meta">
+        <span>Origem: <strong>${camp.origem||'todos'}</strong></span>
+        <span>Localidade: <strong>${camp.filtros?.localidade||'todas'}</strong></span>
+        <span>Leads/vendedor: <strong>${camp.qtd_por_vendedor||40}</strong></span>
+        ${camp.dataFim?`<span>Encerra: <strong>${formatDate(camp.dataFim)}</strong></span>`:''}
+      </div>
+      <div class="camp-vendor-list">${vHTML||'<span style="color:var(--muted);font-size:12px">Nenhum vendedor</span>'}</div>
+    </div>`;
+  }).join('') : '<p style="color:var(--muted);font-size:13px;text-align:center;padding:24px">Nenhuma campanha criada ainda.</p>';
+
+  // botão nova campanha
+  if(!document.getElementById('nova-camp-btn')){
+    const btn=document.createElement('button');
+    btn.id='nova-camp-btn'; btn.className='camp-btn-primary';
+    btn.style.cssText='margin-bottom:20px';
+    btn.textContent='+ Nova Campanha';
+    btn.onclick=abrirFormCampanha;
+    list.parentElement.insertBefore(btn,list);
+  }
+}
+
+function abrirFormCampanha(){
+  const form=document.getElementById('camp-form');
+  form.style.display='';
+  // popular localidades
+  const selLoc=document.getElementById('cf-localidade');
+  selLoc.innerHTML='<option value="todas">Todas</option>'+getCidades().map(c=>`<option value="${c}">${c}</option>`).join('');
+  // popular status
+  const selSt=document.getElementById('cf-status');
+  selSt.innerHTML='<option value="todos">Todos</option>'+STATUSES.map(s=>`<option value="${s}">${STATUS_LABELS[s]}</option>`).join('');
+  // popular vendedores
+  const vDiv=document.getElementById('cf-vendedores');
+  vDiv.innerHTML=vendedoresNaoGestores().map(e=>`
+    <label class="camp-vendor-chk">
+      <input type="checkbox" value="${e}" checked>
+      ${e.split('@')[0]}
+    </label>`).join('') || '<span style="color:var(--muted);font-size:12px">Nenhum vendedor cadastrado ainda.</span>';
+  form.scrollIntoView({behavior:'smooth'});
+}
+
+window.submeterCampanha=async()=>{
+  const nome=document.getElementById('cf-nome').value.trim();
+  if(!nome){ showToast('Informe o nome da campanha'); return; }
+  const filtros={
+    origem: document.getElementById('cf-origem').value,
+    localidade: document.getElementById('cf-localidade').value,
+    status_lead: document.getElementById('cf-status').value,
+  };
+  const qtd=parseInt(document.getElementById('cf-qtd').value)||40;
+  const dataFim=document.getElementById('cf-datafim').value;
+  const vEmails=[...document.querySelectorAll('#cf-vendedores input:checked')].map(i=>i.value);
+  if(!vEmails.length){ showToast('Selecione ao menos um vendedor'); return; }
+
+  const elegiveis=leadsElegiveis(filtros);
+  if(!elegiveis.length){ showToast('Nenhum lead elegível com esses filtros'); return; }
+
+  const campId='camp_'+Date.now();
+  const vendedores={};
+  const disparoPatch={};
+  let offset=0;
+  vEmails.forEach(email=>{
+    const lote=elegiveis.slice(offset,offset+qtd).map(l=>l._id);
+    offset+=qtd;
+    vendedores[safeKey(email)]={nome:email.split('@')[0],email,leads:lote,status:'ativo'};
+    lote.forEach(id=>{disparoPatch[id]=new Date().toISOString().slice(0,10);});
+  });
+
+  const camp={_id:campId,nome,gestor_email:currentUser.email,origem:filtros.origem,filtros,dataFim,qtd_por_vendedor:qtd,status:'ativa',vendedores};
+  await update(ref(db,'campanhas'),{[campId]:camp});
+  if(Object.keys(disparoPatch).length) await update(ref(db,'leads_disparo'),disparoPatch);
+  document.getElementById('camp-form').style.display='none';
+  showToast(`Campanha "${nome}" criada — ${offset} leads distribuídos`,'ok');
+  renderCampaigns();
+};
+
+window.encerrarCampanha=async(campId)=>{
+  if(!confirm('Encerrar esta campanha? Vendedores perderão acesso aos leads.')) return;
+  await update(ref(db,`campanhas/${campId}`),{status:'encerrada'});
+  showToast('Campanha encerrada','ok');
+  renderCampaigns();
+};
 
 function renderReports(){
   const today=new Date().toISOString().slice(0,10);

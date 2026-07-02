@@ -328,6 +328,32 @@
   .camp-btn-encerrar { background:rgba(239,68,68,.1); border:1px solid rgba(239,68,68,.3); color:#EF4444; border-radius:6px; padding:5px 12px; font-size:12px; cursor:pointer; }
   .camp-btn-encerrar:hover { background:rgba(239,68,68,.2); }
   .vendor-waiting { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; gap:14px; color:var(--muted); }
+  /* Abas campanhas */
+  .camp-tabs{display:flex;gap:0;margin-bottom:24px;border-bottom:2px solid var(--border)}
+  .camp-tab{background:none;border:none;padding:10px 22px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s}
+  .camp-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+  .camp-tab:hover:not(.active){color:var(--text)}
+  /* Análise */
+  .analise-section{margin-bottom:28px}
+  .analise-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+  .hot-lead-card{background:rgba(245,166,35,.06);border:1px solid rgba(245,166,35,.3);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:14px;margin-bottom:8px}
+  .hot-badge{background:rgba(245,166,35,.2);color:#D97706;font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;text-transform:uppercase;white-space:nowrap;letter-spacing:.05em}
+  .hot-badge.negociando{background:rgba(14,165,233,.15);color:var(--s-negociando)}
+  .hot-lead-info{flex:1;min-width:0}
+  .hot-lead-id{font-size:13px;font-weight:700;color:var(--text)}
+  .hot-lead-meta{font-size:11px;color:var(--muted);margin-top:2px}
+  .btn-prorrogar{background:var(--accent);color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0}
+  .btn-prorrogar:hover{opacity:.85}
+  .btn-prorrogar.done{background:#10B981;pointer-events:none}
+  .perf-table{width:100%;border-collapse:collapse}
+  .perf-table th{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);padding:7px 10px;text-align:left;border-bottom:1px solid var(--border);font-weight:600}
+  .perf-table td{font-size:12px;padding:8px 10px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
+  .perf-table tr:last-child td{border-bottom:none}
+  .perf-table tbody tr:hover td{background:var(--surface2)}
+  .perf-bar-wrap{display:flex;align-items:center;gap:8px}
+  .perf-mini-bar{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden;min-width:50px}
+  .perf-mini-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .3s}
+  .perf-tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;background:rgba(61,126,245,.12);color:var(--accent)}
 
   /* ── Toast ── */
   #toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(8px); background:#EF4444; color:#fff; padding:10px 20px; border-radius:8px; font-size:13px; font-weight:500; opacity:0; pointer-events:none; transition:opacity .2s,transform .2s; z-index:999; }
@@ -377,11 +403,16 @@
 <div id="camp-overlay">
   <div class="camp-panel">
     <div class="camp-header">
-      <div class="camp-title">🚀 Campanhas de Leads</div>
+      <div class="camp-title">Campanhas de Leads</div>
       <button class="camp-close" onclick="closeCampaigns()">✕</button>
     </div>
-    <div id="camp-list"></div>
-    <div class="camp-form" id="camp-form" style="display:none">
+    <div class="camp-tabs">
+      <button class="camp-tab active" id="tab-btn-campanhas" onclick="switchCampTab('campanhas')">🚀 Campanhas</button>
+      <button class="camp-tab" id="tab-btn-analise" onclick="switchCampTab('analise')">📊 Análise Gerencial</button>
+    </div>
+    <div id="camp-tab-campanhas">
+      <div id="camp-list"></div>
+      <div class="camp-form" id="camp-form" style="display:none">
       <div class="camp-form-title">Nova Campanha</div>
       <div class="camp-form-grid">
         <div class="camp-field"><label>Nome da campanha</label><input type="text" id="cf-nome" placeholder="Ex: Refid Julho - Cravinhos"></div>
@@ -410,6 +441,10 @@
         <button class="camp-btn-secondary" onclick="document.getElementById('camp-form').style.display='none'">Cancelar</button>
         <button class="camp-btn-primary" onclick="submeterCampanha()">Criar Campanha</button>
       </div>
+    </div>
+    </div><!-- /camp-tab-campanhas -->
+    <div id="camp-tab-analise" style="display:none">
+      <div id="analise-content"></div>
     </div>
   </div>
 </div>
@@ -1154,8 +1189,114 @@ document.getElementById('reports-overlay').addEventListener('click',e=>{if(e.tar
 document.getElementById('camp-overlay').addEventListener('click',e=>{if(e.target===document.getElementById('camp-overlay'))closeCampaigns();});
 
 // ── Campanhas ──
-window.openCampaigns=()=>{ renderCampaigns(); document.getElementById('camp-overlay').classList.add('open'); };
+window.openCampaigns=()=>{
+  renderCampaigns();
+  renderAnalise();
+  document.getElementById('camp-overlay').classList.add('open');
+};
 window.closeCampaigns=()=>{ document.getElementById('camp-overlay').classList.remove('open'); };
+
+window.switchCampTab=(tab)=>{
+  document.getElementById('camp-tab-campanhas').style.display = tab==='campanhas' ? '' : 'none';
+  document.getElementById('camp-tab-analise').style.display   = tab==='analise'   ? '' : 'none';
+  document.getElementById('tab-btn-campanhas').classList.toggle('active', tab==='campanhas');
+  document.getElementById('tab-btn-analise').classList.toggle('active',   tab==='analise');
+  if(tab==='analise') renderAnalise();
+};
+
+function renderAnalise(){
+  const hoje=new Date().toISOString().slice(0,10);
+  const el=document.getElementById('analise-content');
+  if(!el) return;
+
+  // Leads quentes: negociando ou proposta, em campanhas ativas
+  const hotLeads=[];
+  const vendPerf={}; // vendKey → {nome, email, total, trabalhados, negociando, proposta, concluido, perdido, campNome}
+
+  Object.values(campanhas).forEach(camp=>{
+    const encerrada=camp.status==='encerrada'||(camp.dataFim&&camp.dataFim<hoje);
+    Object.entries(camp.vendedores||{}).forEach(([vKey,v])=>{
+      if(!vendPerf[vKey]) vendPerf[vKey]={nome:v.nome||v.email,email:v.email,total:0,trabalhados:0,negociando:0,proposta:0,concluido:0,perdido:0};
+      const vp=vendPerf[vKey];
+      (v.leads||[]).forEach(id=>{
+        vp.total++;
+        const d=crmData[id]||{};
+        const st=d.status||'';
+        if(st) vp.trabalhados++;
+        if(st==='negociando') vp.negociando++;
+        if(st==='proposta')   vp.proposta++;
+        if(st==='concluido')  vp.concluido++;
+        if(st==='perdido')    vp.perdido++;
+        if(!encerrada && (st==='negociando'||st==='proposta')){
+          const lead=leads.find(l=>l._id===id);
+          hotLeads.push({id,lead,status:st,vKey,vNome:v.nome||v.email.split('@')[0],campId:camp._id,campNome:camp.nome,prorrogado:(camp.prorrogacoes||{})[id]?.ate||null});
+        }
+      });
+    });
+  });
+
+  // Hot leads HTML
+  const hotHTML = hotLeads.length ? hotLeads.map(h=>{
+    const nome=h.lead?.nome||h.id;
+    const cidade=h.lead?.cidade||'';
+    const jaProrrogado=h.prorrogado && h.prorrogado>=hoje;
+    const btnLabel=jaProrrogado?`✓ Prorrogado até ${formatDate(h.prorrogado)}`:'Prorrogar 24h';
+    const btnCls=jaProrrogado?'btn-prorrogar done':'btn-prorrogar';
+    const badge=h.status==='negociando'?'<span class="hot-badge negociando">Negociando</span>':'<span class="hot-badge">Proposta</span>';
+    return `<div class="hot-lead-card">
+      ${badge}
+      <div class="hot-lead-info">
+        <div class="hot-lead-id">${nome}</div>
+        <div class="hot-lead-meta">${cidade?cidade+' · ':''}${h.vNome} · ${h.campNome}</div>
+      </div>
+      <button class="${btnCls}" onclick="prorrogarLead('${h.campId}','${h.id}','${h.vKey}')" ${jaProrrogado?'disabled':''}>${btnLabel}</button>
+    </div>`;
+  }).join('') : '<p style="color:var(--muted);font-size:13px;padding:12px 0">Nenhum lead quente no momento.</p>';
+
+  // Performance table HTML
+  const vpList=Object.values(vendPerf).sort((a,b)=>b.total-a.total);
+  const tRows=vpList.map(v=>{
+    const pct=v.total?Math.round((v.trabalhados/v.total)*100):0;
+    const conv=v.total?Math.round((v.concluido/v.total)*100):0;
+    return `<tr>
+      <td><strong>${v.nome}</strong></td>
+      <td style="text-align:center">${v.total}</td>
+      <td>
+        <div class="perf-bar-wrap">
+          <div class="perf-mini-bar"><div class="perf-mini-fill" style="width:${pct}%"></div></div>
+          <span class="perf-tag">${pct}%</span>
+        </div>
+      </td>
+      <td style="text-align:center">${v.negociando+v.proposta}</td>
+      <td style="text-align:center">${v.concluido}</td>
+      <td style="text-align:center"><strong>${conv}%</strong></td>
+    </tr>`;
+  }).join('');
+
+  el.innerHTML=`
+    <div class="analise-section">
+      <div class="analise-title">🔥 Leads Quentes <span style="font-size:10px;font-weight:400;color:var(--muted)">(negociando / proposta)</span></div>
+      <div class="hot-leads-grid">${hotHTML}</div>
+    </div>
+    <div class="analise-section">
+      <div class="analise-title">📈 Performance por Vendedor</div>
+      ${vpList.length ? `<table class="perf-table">
+        <thead><tr>
+          <th>Vendedor</th><th style="text-align:center">Total</th>
+          <th>Trabalhados</th><th style="text-align:center">Quentes</th>
+          <th style="text-align:center">Fechados</th><th style="text-align:center">Conversão</th>
+        </tr></thead>
+        <tbody>${tRows}</tbody>
+      </table>` : '<p style="color:var(--muted);font-size:13px">Nenhuma campanha com dados ainda.</p>'}
+    </div>`;
+}
+
+window.prorrogarLead=async(campId,leadId,vKey)=>{
+  const amanha=new Date(Date.now()+86400000).toISOString().slice(0,10);
+  await update(ref(db,`campanhas/${campId}/prorrogacoes`),{[leadId]:{vendedor:vKey,ate:amanha}});
+  showToast('Lead prorrogado por 24h','ok');
+  renderAnalise();
+};
 
 function renderCampaigns(){
   const hoje=new Date().toISOString().slice(0,10);

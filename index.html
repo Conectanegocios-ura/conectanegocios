@@ -14,6 +14,19 @@
   /* ── Login ── */
   #login-screen { position:fixed; inset:0; background:#F4F6FA; display:flex; align-items:center; justify-content:center; z-index:200; }
   #login-screen.hidden { display:none; }
+
+  /* ── Hub ── */
+  #hub-screen { position:fixed; inset:0; background:#F8FAFC; display:none; align-items:center; justify-content:center; z-index:190; flex-direction:column; gap:48px; }
+  #hub-screen.visible { display:flex; }
+  .hub-brand { display:flex; flex-direction:column; align-items:center; gap:8px; }
+  .hub-title { font-size:22px; font-weight:700; color:var(--text); letter-spacing:.02em; }
+  .hub-tagline { font-size:13px; color:var(--muted); }
+  .hub-cards { display:flex; gap:24px; flex-wrap:wrap; justify-content:center; }
+  .hub-card { background:#fff; border:1px solid var(--border2); border-radius:16px; padding:36px 40px; width:220px; display:flex; flex-direction:column; align-items:center; gap:16px; cursor:pointer; transition:box-shadow .18s,transform .18s; text-align:center; }
+  .hub-card:hover { box-shadow:0 8px 32px rgba(61,126,245,.13); transform:translateY(-3px); }
+  .hub-card-icon { font-size:42px; line-height:1; }
+  .hub-card-name { font-size:15px; font-weight:700; color:var(--text); }
+  .hub-card-desc { font-size:12px; color:var(--muted); line-height:1.5; }
   .login-wrap { display:flex; flex-direction:column; align-items:center; gap:28px; }
   .login-brand { display:flex; flex-direction:column; align-items:center; gap:0; }
   .login-box { background:#fff; border:1px solid #E2E8F2; border-radius:14px; padding:36px 44px; width:360px; display:flex; flex-direction:column; align-items:center; gap:18px; box-shadow:0 4px 24px rgba(0,0,0,.08); }
@@ -260,6 +273,26 @@
         Entrar com Google
       </button>
       <div class="login-disclaimer">Apenas usuários autorizados pela Conecta Tech<br>têm acesso ao sistema.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Hub -->
+<div id="hub-screen">
+  <div class="hub-brand">
+    <div class="hub-title">Conecta Tech</div>
+    <div class="hub-tagline">Crescer Nos Conecta!</div>
+  </div>
+  <div class="hub-cards">
+    <div class="hub-card" onclick="entrarCRM()">
+      <div class="hub-card-icon">📋</div>
+      <div class="hub-card-name">CRM Leads</div>
+      <div class="hub-card-desc">Gerencie leads, campanhas e acompanhe o funil de vendas</div>
+    </div>
+    <div class="hub-card" id="hub-painel-card" style="display:none" onclick="window.location='painel.html'">
+      <div class="hub-card-icon">📊</div>
+      <div class="hub-card-name">Painel de Vendas</div>
+      <div class="hub-card-desc">Acompanhe os resultados do time em tempo real</div>
     </div>
   </div>
 </div>
@@ -555,8 +588,14 @@ window.loginGoogle = async () => {
 window.logoutUser = async () => {
   await signOut(auth);
   currentUser = null; leads = []; crmData = {}; selectedId = null;
+  document.getElementById('hub-screen').classList.remove('visible');
   renderList();
   document.getElementById('detail-panel').innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:12px;color:var(--muted)"><p style="font-size:13px">Selecione um lead da lista</p></div>`;
+};
+
+window.entrarCRM = () => {
+  document.getElementById('hub-screen').classList.remove('visible');
+  iniciarSync();
 };
 
 onAuthStateChanged(auth, user => {
@@ -568,7 +607,9 @@ onAuthStateChanged(auth, user => {
       <span>${user.displayName || user.email}</span>
       <button class="logout-btn" onclick="logoutUser()">Sair</button>`;
     atualizarUIperfil();
-    iniciarSync();
+    const painelCard = document.getElementById('hub-painel-card');
+    if (painelCard) painelCard.style.display = isGestor() ? '' : 'none';
+    document.getElementById('hub-screen').classList.add('visible');
   } else {
     document.getElementById('login-screen').classList.remove('hidden');
     document.getElementById('user-chip').innerHTML = '';

@@ -297,6 +297,16 @@
   .v-info-row{margin-bottom:10px}
   .v-info-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
   .v-info-val{font-size:13px;font-weight:600;color:var(--text);margin-top:1px}
+  /* Score card */
+  .score-card{display:flex;flex-direction:column;align-items:center;gap:12px}
+  .score-medal-wrap{display:flex;flex-direction:column;align-items:center;gap:4px}
+  .score-medal-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+  .score-metrics{width:100%}
+  .score-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px}
+  .score-row:last-child{border-bottom:none}
+  .score-lbl{color:var(--muted)}
+  .score-val{font-weight:700;font-variant-numeric:tabular-nums}
+  .score-empty{font-size:12px;color:var(--muted);text-align:center;padding:16px 0;font-style:italic}
   .v-hist-entry{padding:10px 0;border-bottom:1px solid var(--border)}
   .v-hist-entry:last-child{border-bottom:none}
   .v-hist-action{font-size:12px;font-weight:600;color:var(--text)}
@@ -564,9 +574,9 @@
       <span class="stat"><span class="dot" style="background:var(--s-qualificado)"></span><strong id="cnt-qualificado">0</strong> qualif.</span>
       <span class="stat"><span class="dot" style="background:var(--s-fechado)"></span><strong id="cnt-fechado">0</strong> fechados</span>
     </div>
-    <button class="reports-btn" id="reports-btn" onclick="openReports()" style="display:none">📊 Relatórios</button>
+    <button class="reports-btn" id="reports-btn" onclick="openReports()" style="display:none">📈 Relatórios</button>
     <button class="reports-btn" id="camp-btn" onclick="openCampaigns()" style="display:none;background:var(--accent);color:#fff;border-color:var(--accent)">🚀 Campanhas</button>
-    <button class="reports-btn" id="painel-btn" onclick="window.location='painel.html'" style="display:none">📊 Painel</button>
+    <button class="reports-btn" id="painel-btn" onclick="window.location='painel.html'" style="display:none">🏆 Painel de Vendas</button>
     <button class="reports-btn" id="logs-btn" onclick="openLogs()" style="display:none">📋 Logs</button>
   </header>
 
@@ -683,6 +693,7 @@ let listPage = 1;
 const PAGE_SIZE = 80;
 let campanhas = {};
 let leadsDisparo = {};
+let vendorScore = null;
 
 // ── Status unificado ──
 const STATUSES = ['novo','em_contato','qualificado','proposta','negociando','concluido','perdido'];
@@ -881,6 +892,13 @@ function iniciarSync() {
   onValue(ref(db, 'leads_disparo'), snap => {
     leadsDisparo = snap.val() || {};
   });
+  if (!isGestor() && currentUser) {
+    onValue(ref(db, 'scores/' + safeKey(currentUser.email)), snap => {
+      vendorScore = snap.val() || null;
+      const el = document.getElementById('v-score-block');
+      if (el) renderScoreCard();
+    });
+  }
 }
 function setSyncStatus(s) {
   const dot = document.getElementById('sync-dot'), lbl = document.getElementById('sync-label');
@@ -1772,6 +1790,61 @@ function renderVendorCenter(lead){
     </button>`;
 }
 
+function getMedalSVG(type){
+  const c={bronze:{main:'#CD7F32',dark:'#A0522D',shine:'#E8B96A'},silver:{main:'#B0B8C1',dark:'#7A8490',shine:'#E8ECF0'},gold:{main:'#FFB800',dark:'#D48F00',shine:'#FFE066'},diamond:{main:'#29C6E0',dark:'#0E9AB8',shine:'#A0ECFA'}};
+  const {main,dark,shine}=c[type];
+  const isDiamond=type==='diamond';
+  const inner=isDiamond
+    ?`<polygon points="26,23 33,32 26,41 19,32" fill="white" opacity="0.25"/><polygon points="26,26 31,32 26,38 21,32" fill="white" opacity="0.2"/>`
+    :`<circle cx="26" cy="32" r="9" fill="${dark}"/><circle cx="26" cy="32" r="7" fill="${main}" opacity="0.5"/>`;
+  return `<svg width="56" height="56" viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="17,3 22,3 22,20 15,20" fill="${main}" opacity="0.9"/>
+    <polygon points="30,3 35,3 37,20 30,20" fill="${main}" opacity="0.9"/>
+    <circle cx="26" cy="32" r="16" fill="${dark}"/>
+    <circle cx="26" cy="32" r="14" fill="${main}"/>
+    <ellipse cx="21" cy="26" rx="5" ry="3" fill="${shine}" opacity="0.5" transform="rotate(-35,21,26)"/>
+    ${inner}
+  </svg>`;
+}
+
+function renderScoreCard(){
+  const el=document.getElementById('v-score-block');
+  if(!el)return;
+  if(!vendorScore||!vendorScore.meta){
+    el.innerHTML=`<div class="v-right-section"><div class="v-right-title">⭐ Score de Performance</div><div class="score-empty">Aguardando dados do gestor</div></div>`;
+    return;
+  }
+  const {meta,resultado_atual,dias_passados,dias_totais}=vendorScore;
+  let projetado=resultado_atual,pct=0;
+  if(dias_passados>0&&dias_totais>0){
+    projetado=(resultado_atual/dias_passados)*dias_totais;
+    pct=(projetado/meta)*100;
+  } else {
+    pct=(resultado_atual/meta)*100;
+  }
+  let medal,medalColor;
+  if(pct<80){medal='bronze';medalColor='#CD7F32';}
+  else if(pct<100){medal='silver';medalColor='#B0B8C1';}
+  else if(pct<120){medal='gold';medalColor='#FFB800';}
+  else{medal='diamond';medalColor='#29C6E0';}
+  const medalLabel={bronze:'Bronze',silver:'Prata',gold:'Ouro',diamond:'Diamante'}[medal];
+  const fmt=v=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0}).format(v);
+  el.innerHTML=`<div class="v-right-section">
+    <div class="v-right-title">⭐ Score de Performance</div>
+    <div class="score-card">
+      <div class="score-medal-wrap">
+        ${getMedalSVG(medal)}
+        <div class="score-medal-label" style="color:${medalColor}">${medalLabel}</div>
+      </div>
+      <div class="score-metrics">
+        <div class="score-row"><span class="score-lbl">Meta do período</span><span class="score-val">${fmt(meta)}</span></div>
+        <div class="score-row"><span class="score-lbl">Resultado atual</span><span class="score-val">${fmt(resultado_atual)}</span></div>
+        <div class="score-row"><span class="score-lbl">Resultado projetado</span><span class="score-val" style="color:${medalColor}">${pct.toFixed(1)}%</span></div>
+      </div>
+    </div>
+  </div>`;
+}
+
 function renderVendorRight(lead){
   const data=getCRM(lead._id);
   document.getElementById('v-contract-data').innerHTML=`
@@ -1800,6 +1873,13 @@ function renderVendorRight(lead){
       <div class="v-right-title">Histórico</div>
       ${histHtml}
     </div>`;
+  const scoreBlock=document.getElementById('v-score-block');
+  if(!scoreBlock){
+    const div=document.createElement('div');
+    div.id='v-score-block';
+    document.getElementById('v-right').appendChild(div);
+  }
+  renderScoreCard();
 }
 
 window.vendorSetResult=async(key,status,label)=>{

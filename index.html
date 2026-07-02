@@ -38,6 +38,20 @@
   .login-disclaimer { font-size:11px; color:#9BADC4; text-align:center; line-height:1.5; }
 
   /* ── Relatórios ── */
+  #logs-overlay { display:none; position:fixed; inset:0; background:rgba(7,17,31,.7); z-index:150; align-items:flex-start; justify-content:center; padding:40px 20px; overflow-y:auto; }
+  #logs-overlay.open { display:flex; }
+  .logs-panel { background:var(--surface); border:1px solid var(--border2); border-radius:14px; width:100%; max-width:860px; padding:32px 36px; }
+  .logs-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+  .logs-title { font-size:17px; font-weight:700; color:var(--text); }
+  .logs-filters { display:flex; gap:10px; align-items:center; margin-bottom:20px; flex-wrap:wrap; }
+  .logs-filters select { padding:7px 12px; border:1px solid var(--border2); border-radius:6px; font-size:13px; background:var(--surface2); color:var(--text); }
+  #logs-table-wrap { overflow-x:auto; }
+  .logs-table { width:100%; border-collapse:collapse; font-size:13px; }
+  .logs-table th { background:var(--surface2); color:var(--muted); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; padding:8px 12px; text-align:left; border-bottom:1px solid var(--border); }
+  .logs-table td { padding:10px 12px; border-bottom:1px solid var(--border); color:var(--text); vertical-align:middle; }
+  .logs-table tr:last-child td { border-bottom:none; }
+  .logs-table tr:hover td { background:var(--surface2); }
+  .log-device { display:inline-flex; align-items:center; gap:5px; font-size:12px; padding:3px 8px; border-radius:10px; background:var(--surface2); border:1px solid var(--border); }
   #reports-overlay { display:none; position:fixed; inset:0; background:rgba(7,17,31,.7); z-index:150; align-items:flex-start; justify-content:center; padding:40px 20px; overflow-y:auto; }
   #reports-overlay.open { display:flex; }
   .reports-panel { background:var(--surface); border:1px solid var(--border2); border-radius:14px; width:100%; max-width:920px; padding:32px 36px; }
@@ -382,33 +396,43 @@
 <!-- Hub -->
 <div id="hub-screen">
   <div class="hub-brand">
-    <div class="hub-title">Conecta Tech</div>
+    <svg width="100" height="100" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+      <defs><clipPath id="hc"><circle cx="60" cy="60" r="60"/></clipPath></defs>
+      <g clip-path="url(#hc)">
+        <circle cx="60" cy="60" r="60" fill="#0033FF"/>
+        <circle cx="84" cy="72" r="62" fill="#00DEC8" opacity="0.86"/>
+      </g>
+      <polygon points="38,38 38,82 84,60" fill="white" clip-path="url(#hc)"/>
+    </svg>
+    <div class="hub-title">CONECTA <span style="color:#0099FF">TECH</span></div>
     <div class="hub-tagline">Crescer Nos Conecta!</div>
   </div>
   <div class="hub-cards">
     <div class="hub-card" onclick="entrarCRM()">
-      <div class="hub-card-icon" style="background:#EDE9FF">
-        <svg width="52" height="52" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="28" cy="18" r="9" fill="#7C5CDB"/>
-          <path d="M10 46c0-9.941 8.059-18 18-18s18 8.059 18 18" stroke="#7C5CDB" stroke-width="3.5" stroke-linecap="round" fill="none"/>
-          <path d="M28 34 L22 42 L28 39 L34 42 Z" fill="#A78EEF"/>
+      <div class="hub-card-icon" style="background:transparent">
+        <svg width="72" height="72" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+          <defs><clipPath id="hc1"><circle cx="60" cy="60" r="60"/></clipPath></defs>
+          <g clip-path="url(#hc1)">
+            <circle cx="60" cy="60" r="60" fill="#0033FF"/>
+            <circle cx="84" cy="72" r="62" fill="#00DEC8" opacity="0.86"/>
+          </g>
+          <polygon points="38,38 38,82 84,60" fill="white" clip-path="url(#hc1)"/>
         </svg>
       </div>
       <div class="hub-card-name">CRM Leads</div>
-      <div class="hub-card-desc">Gerencie leads, campanhas e acompanhe o funil de vendas</div>
     </div>
     <div class="hub-card" id="hub-painel-card" style="display:none" onclick="window.location='painel.html'">
-      <div class="hub-card-icon" style="background:#E6F9F0">
-        <svg width="52" height="52" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="8" y="30" width="10" height="16" rx="2" fill="#22A06B"/>
-          <rect x="23" y="20" width="10" height="26" rx="2" fill="#22A06B"/>
-          <rect x="38" y="10" width="10" height="36" rx="2" fill="#22A06B"/>
-          <polyline points="13,28 28,18 43,8" stroke="#16734D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-          <polygon points="43,4 50,11 36,11" fill="#16734D"/>
+      <div class="hub-card-icon" style="background:transparent">
+        <svg width="72" height="72" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+          <defs><clipPath id="hc2"><circle cx="60" cy="60" r="60"/></clipPath></defs>
+          <g clip-path="url(#hc2)">
+            <circle cx="60" cy="60" r="60" fill="#0033FF"/>
+            <circle cx="84" cy="72" r="62" fill="#00DEC8" opacity="0.86"/>
+          </g>
+          <polygon points="38,38 38,82 84,60" fill="white" clip-path="url(#hc2)"/>
         </svg>
       </div>
       <div class="hub-card-name">Painel de Vendas</div>
-      <div class="hub-card-desc">Acompanhe os resultados do time em tempo real</div>
     </div>
   </div>
 </div>
@@ -464,6 +488,37 @@
 </div>
 
 <!-- Relatórios overlay -->
+<div id="logs-overlay">
+  <div class="logs-panel">
+    <div class="logs-header">
+      <div class="logs-title">📋 Logs de Acesso</div>
+      <button class="camp-close" onclick="closeLogs()">✕</button>
+    </div>
+    <div class="logs-filters">
+      <select id="log-filtro-email">
+        <option value="">Todos os usuários</option>
+      </select>
+      <select id="log-filtro-periodo">
+        <option value="7">Últimos 7 dias</option>
+        <option value="30" selected>Últimos 30 dias</option>
+        <option value="90">Últimos 90 dias</option>
+        <option value="0">Todos</option>
+      </select>
+      <button class="camp-btn-primary" onclick="renderLogs()">Filtrar</button>
+    </div>
+    <div id="logs-table-wrap">
+      <table class="logs-table">
+        <thead><tr>
+          <th>Data / Hora</th>
+          <th>Usuário</th>
+          <th>Dispositivo</th>
+        </tr></thead>
+        <tbody id="logs-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
 <div id="reports-overlay">
   <div class="reports-panel" id="reports-panel">
     <div class="rp-header">
@@ -534,6 +589,7 @@
     <button class="reports-btn" id="reports-btn" onclick="openReports()" style="display:none">📊 Relatórios</button>
     <button class="reports-btn" id="camp-btn" onclick="openCampaigns()" style="display:none;background:var(--accent);color:#fff;border-color:var(--accent)">🚀 Campanhas</button>
     <button class="reports-btn" id="painel-btn" onclick="window.location='painel.html'" style="display:none">📊 Painel</button>
+    <button class="reports-btn" id="logs-btn" onclick="openLogs()" style="display:none">📋 Logs</button>
   </header>
 
   <div id="main">
@@ -586,7 +642,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getDatabase, ref, onValue, set, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const EMAILS_PERMITIDOS = [
@@ -595,11 +651,13 @@ const EMAILS_PERMITIDOS = [
   "israel@conectanegocios.biz",
   "andre@conectanegocios.biz",
   "israel.gpconecta@gmail.com",
+  "rogerioalvescastro@hotmail.com",
 ];
 const EMAILS_GESTORES = [
   "israel@conectanegocios.biz",
   "rogeriocastro@conectanegocios.biz",
   "andre@conectanegocios.biz",
+  "rogerioalvescastro@hotmail.com",
 ];
 
 const firebaseConfig = {
@@ -616,6 +674,21 @@ const app      = initializeApp(firebaseConfig);
 const auth     = getAuth(app);
 const db       = getDatabase(app);
 const provider = new GoogleAuthProvider();
+const MASTER_EMAIL = "israel@conectanegocios.biz";
+const isMaster = () => currentUser && currentUser.email === MASTER_EMAIL;
+
+async function gravarLogAcesso(user) {
+  const ts = Date.now();
+  const chave = new Date(ts).toISOString().replace(/[:.]/g,'-').slice(0,19) + '_' + safeKey(user.email);
+  await update(ref(db, 'logs/acessos'), {
+    [chave]: {
+      email: user.email,
+      ts,
+      dispositivo: isMobile() ? 'mobile' : 'desktop',
+      navegador: navigator.userAgent.slice(0,120)
+    }
+  });
+}
 
 // ── State ──
 let currentUser    = null;
@@ -740,15 +813,30 @@ function diasParaJanela(lead) {
 }
 
 // ── Auth ──
+const isMobile = () => /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
 window.loginGoogle = async () => {
   try {
-    const result = await signInWithPopup(auth, provider);
-    if (!EMAILS_PERMITIDOS.includes(result.user.email)) {
-      await signOut(auth);
-      showToast('Acesso negado: ' + result.user.email + ' não autorizado.');
+    if (isMobile()) {
+      await signInWithRedirect(auth, provider);
+    } else {
+      const result = await signInWithPopup(auth, provider);
+      if (!EMAILS_PERMITIDOS.includes(result.user.email)) {
+        await signOut(auth);
+        showToast('Acesso negado: ' + result.user.email + ' não autorizado.');
+      }
     }
   } catch(e) { showToast('Erro ao fazer login: ' + e.message); }
 };
+
+// Captura resultado do redirect (mobile)
+getRedirectResult(auth).then(result => {
+  if (!result) return;
+  if (!EMAILS_PERMITIDOS.includes(result.user.email)) {
+    signOut(auth);
+    showToast('Acesso negado: ' + result.user.email + ' não autorizado.');
+  }
+}).catch(e => { if (e.code !== 'auth/no-current-user') showToast('Erro ao fazer login: ' + e.message); });
 window.logoutUser = async () => {
   await signOut(auth);
   currentUser = null; leads = []; crmData = {}; selectedId = null;
@@ -785,6 +873,7 @@ onAuthStateChanged(auth, user => {
     const painelCard = document.getElementById('hub-painel-card');
     if (painelCard) painelCard.style.display = isGestor() ? '' : 'none';
     document.getElementById('hub-screen').classList.add('visible');
+    gravarLogAcesso(user).catch(()=>{});
   } else {
     document.getElementById('login-screen').classList.remove('hidden');
     document.getElementById('user-chip').innerHTML = '';
@@ -1017,6 +1106,8 @@ function atualizarUIperfil(){
   if(painelBtn) painelBtn.style.display=gestor?'':'none';
   if(loadBtn) loadBtn.style.display=gestor?'':'none';
   if(mailBtn) mailBtn.style.display=gestor?'':'none';
+  const logsBtn=document.getElementById('logs-btn');
+  if(logsBtn) logsBtn.style.display=isMaster()?'':'none';
 }
 
 let _renderTimer=null;
@@ -1424,6 +1515,64 @@ window.encerrarCampanha=async(campId)=>{
   await update(ref(db,`campanhas/${campId}`),{status:'encerrada'});
   showToast('Campanha encerrada','ok');
   renderCampaigns();
+};
+
+// ── Logs de Acesso ──
+let logsData = {};
+
+window.openLogs = () => {
+  if (!isMaster()) return;
+  onValue(ref(db, 'logs/acessos'), snap => { logsData = snap.val() || {}; }, { onlyOnce: true });
+  renderLogs();
+  document.getElementById('logs-overlay').classList.add('open');
+};
+
+window.closeLogs = () => document.getElementById('logs-overlay').classList.remove('open');
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('logs-overlay')?.addEventListener('click', e => {
+    if (e.target === document.getElementById('logs-overlay')) closeLogs();
+  });
+});
+
+window.renderLogs = () => {
+  if (!isMaster()) return;
+  onValue(ref(db, 'logs/acessos'), snap => {
+    logsData = snap.val() || {};
+
+    const emailFiltro = document.getElementById('log-filtro-email').value;
+    const dias = parseInt(document.getElementById('log-filtro-periodo').value);
+    const corte = dias > 0 ? Date.now() - dias * 86400000 : 0;
+
+    // Popular select de emails
+    const sel = document.getElementById('log-filtro-email');
+    const emails = [...new Set(Object.values(logsData).map(l => l.email))].sort();
+    const atual = sel.value;
+    sel.innerHTML = '<option value="">Todos os usuários</option>' +
+      emails.map(e => `<option value="${e}" ${e===atual?'selected':''}>${e}</option>`).join('');
+
+    const registros = Object.values(logsData)
+      .filter(l => (!emailFiltro || l.email === emailFiltro) && l.ts >= corte)
+      .sort((a, b) => b.ts - a.ts);
+
+    const tbody = document.getElementById('logs-tbody');
+    if (!registros.length) {
+      tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:24px">Nenhum registro encontrado.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = registros.map(l => {
+      const d = new Date(l.ts);
+      const data = d.toLocaleDateString('pt-BR');
+      const hora = d.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+      const icon = l.dispositivo === 'mobile' ? '📱' : '🖥️';
+      return `<tr>
+        <td style="font-variant-numeric:tabular-nums">${data} ${hora}</td>
+        <td>${l.email}</td>
+        <td><span class="log-device">${icon} ${l.dispositivo}</span></td>
+      </tr>`;
+    }).join('');
+  }, { onlyOnce: true });
 };
 
 function renderReports(){
